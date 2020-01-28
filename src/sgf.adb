@@ -45,6 +45,27 @@ package body sgf is
             return new_noeud;
     end asc_arborescence_sgf;
 
+    --fonction remonte_racine_sgf permet de remonter à la racine du SGF
+    function remonte_racine_sgf(courant:in P_sgf) return P_sgf is
+        --R0:[Comment remonter à la racine]
+        new_noeud:P_sgf;
+        new_noeud2:P_sgf;
+        begin --début remonte_racine_sgf
+            --R1:Comment R0
+
+            new_noeud := courant;
+            new_noeud2 := courant;
+
+            loop
+                new_noeud := asc_arborescence(new_noeud2);
+                exit when new_noeud = new_noeud2;
+                new_noeud2 := new_noeud;
+                
+            end loop;
+            return new_noeud;
+
+    end remonte_racine_sgf;
+
     --fonction repertoire_courant permet de connaitre dans quel repertoire courant se trouve l'utilisateur
     function repertoire_courant(sgf:in P_sgf) return unbounded_string is
         --R0:[Afficher le répertoire courant]

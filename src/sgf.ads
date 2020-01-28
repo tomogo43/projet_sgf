@@ -90,6 +90,8 @@ package sgf is
 
     function repertoire_courant(sgf:in P_sgf) return unbounded_string;
 
+    function remonte_racine_sgf(courant:in P_sgf) return P_sgf;
+
     --*********************************************************************
     --nom: isTrouve
     --sémantique: Permet de savoir si un élément est présent dans le sgf

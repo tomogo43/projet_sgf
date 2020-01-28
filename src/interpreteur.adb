@@ -66,8 +66,81 @@ package body interpreteur is
 
     end input_commande;
 
+    --fonction change_directory permet de changer de chemin 
+    function change_directory(noeud:in P_sgf;chemin:in string;lchemin:in integer) return P_sgf is
 
-    --procedure detection_commande qui detecte la première commande saisie
+        taille:constant integer:=20;
+        tab:tabSep(1..taille);
+        trouve_noeud:P_sgf;
+        new_noeud:P_sgf;
+        isTrouve:boolean := false;
+
+        valideChemin:boolean:=true; 
+
+        --R0:[Comment faire un change directory]
+
+        begin --debut change_directory 
+
+            --R1:Comment R0
+
+            --R2:Regarder si le chemin possède des séparateurs /
+
+            if(nbSeparateur(chemin,lchemin,'/') > 0) then --si il y a un separateur / dans le chemin
+                    
+                --R3:Cherche le noeud en fonction du chemin saisi
+                trouve_noeud := noeud;
+
+                split(chemin,lchemin,'/',tab);
+
+                for i in 1..(nbSeparateur(chemin,lchemin,'/') + 1) loop
+
+                    trouve_noeud := desc_arborescence_sgf(trouve_noeud,to_string(tab(i)),isTrouve);
+
+                    if(isTrouve = false) then --si le chemin n'est pas trouvable
+
+                        --affiche l'erreur du chemin introuvable 
+                        put(chemin);
+                        put(" : chemin introuvable");
+                        new_line;
+                        valideChemin := false;
+                        exit; --sort de la boucle
+                        
+                    end if;
+                end loop;
+
+                --le chemin a bien été trouvé 
+                if(valideChemin) then
+                    new_noeud := trouve_noeud;
+                end if;
+
+            else
+                if(chemin="..") then
+                    new_noeud := asc_arborescence_sgf(noeud); --remonte dans l'arborescence
+
+                elsif(chemin="~") then             --remonte à la racine du SGF
+                    new_noeud := remonte_racine_sgf(noeud);
+                else
+                new_noeud := desc_arborescence_sgf(noeud,chemin,isTrouve); --descend vers le bon repertoire
+
+                --affiche un message pour dire que l'événement n'a pas été trouvé
+                if(isTrouve /= true) then
+                    new_line;
+                    put(chemin);
+                    put(" : non trouvé");
+                    new_line;
+                end if;
+
+            end if;
+
+        end if;
+
+        return new_noeud;
+
+    end change_directory; --fin change_directory
+
+
+
+    --fonction detection_commande qui detecte la première commande saisie
     function detection_commande(commande:in string;lcommande:in integer;noeud:in out P_sgf) return P_sgf is
         --R0:[Comment détecter la première commande saisie]
 
@@ -82,7 +155,10 @@ package body interpreteur is
         chemin:unbounded_string:= to_unbounded_string(commande(commande'First + 3 .. lcommande));
             
         --contient la taille du chemin
-        lchemin:integer:= lcommande - 3;  
+        lchemin:integer:= lcommande - 3; 
+
+        --boolean qui informe si le chemin est correct ou non
+        valideChemin:boolean:=true; 
 
         taille:constant integer:=20;     --taille du tableau assez grand avec 20 séparateurs
         tab:tabSep(1..taille);           --contient les éléments split du chemin
@@ -99,66 +175,25 @@ package body interpreteur is
             if(commande(commande'First..commande'First+1) = "cd") then
                 --R3:Réalise les opérations sur la commande cd
                 
-                --détermine le nombre de séparateur / dans le chemin 
-                if(nbSeparateur(to_string(chemin),lchemin,'/') > 0) then --si il y a un separateur / dans le chemin
-                    
-                    --taille := nbSeparateur(to_string(chemin),lchemin,'/') + 1; --n sperateurs = n+1 elt
 
-
-                    put("split");
-                    new_line;
-                    split(to_string(chemin),lchemin,'/',tab);
-                    
-                    new_line;
-                    put("***");
-                    new_line;
-
-                    trouve_noeud := noeud;
-
-                    for i in 1..(nbSeparateur(to_string(chemin),lchemin,'/') + 1) loop
-                        put(to_string(tab(i)));
-
-                        trouve_noeud := desc_arborescence_sgf(noeud,to_string(tab(i)),isTrouve);
-
-                        --if(isTrouve(noeud,to_string(tab(i)))) then
-                        --    put("true");
-                        --    new_linchemine;
-                        --else
-                        --    put("false");
-                        --    new_line;
-                        --end if;
-
-
-                        new_line;
-                    end loop;
-
-                    put(nbSeparateur(to_string(chemin),lchemin,'/'));
-                    new_line;
-
-
-                else
-                    if(to_string(chemin)="..") then
-                        new_noeud := asc_arborescence_sgf(noeud); --remonte dans l'arborescence
-                    else
-                        new_noeud := desc_arborescence_sgf(noeud,to_string(chemin),isTrouve); --descend vers le bon repertoire
-
-                        --affiche un message pour dire que l'événement n'a pas été trouvé
-                        if(isTrouve /= true) then
-                            new_line;
-                            put(to_string(chemin));
-                            put(" : non trouvé");
-                        end if;
-
-                    end if;
-
-                    new_line;
-                end if;
-
+                new_noeud := change_directory(noeud,to_string(chemin),lchemin);
 
             --R2:Si "ls"    
             elsif(commande(commande'First..commande'First+1) = "ls") then
 
-                afficher_liste(noeud);
+                --R3:Les différents fonctionnement de ls
+                --  (1) un chemin est spécifié
+                --  (2) aucun chemin n'est renseigné
+                
+
+                --R4:Comment R3-1
+                if(lcommande > 2) then
+                    put("un chemin est spécifié");
+                    new_line;
+                else
+                --R4:Comment R3-2
+                    afficher_liste(noeud);
+                end if;
 
                 new_line;
             
@@ -206,30 +241,44 @@ package body interpreteur is
         deb:integer;
         lch2:integer; --longueur de la chaine suivante à traiter
         begin --debut split
-            put(chaine);
 
-            i:=0;
+            --R1:Comment R0
+
+            --variable d'incrémentation
+            i:=0; 
             j:=1;
 
-            deb:=chaine'First;
+            deb:=chaine'First; 
+
+            --R2:Parcourir la chaine est séparer tous les éléments en fonction du séparateur
             loop
+
+                --R3:Récupérer le premier morceau entre le début de la chaîne et le separateur
                 loop
                 i:=i+1;
                     exit when (chaine(i) = sep);
                     i := i + 1;
                 end loop;
-
+                
+                --ch1 prend la valeur du premier morceau
                 ch1 := to_unbounded_string(chaine(deb..i-1));
+
+                --morceau suivant à traiter
                 ch2 := to_unbounded_string(chaine(i+1..lchaine));
 
+                --le tableau est rempli avec tous les morceaux séparés
                 tab(j) := ch1;
+
+                --change la position de recherche 
                 deb:=i+1;
                 j := j + 1;
-
+                
+                --longeueur de la deuxième chaîne à traiter
                 lch2 := lchaine - i;
 
+                --si il n'y a plus de séparateur dans ch2
                 if(nbSeparateur(to_string(ch2),lch2,sep)=0) then
-                    tab(j) := ch2;
+                    tab(j) := ch2; --on ajoute le deuxième morceau dans le tableau 
                     exit;
                 end if;
 
