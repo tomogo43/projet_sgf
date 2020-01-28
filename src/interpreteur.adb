@@ -73,16 +73,20 @@ package body interpreteur is
 
 
         new_noeud:P_sgf;
-        tmpC1:unbounded_string;
-        tmpC2:unbounded_string;
 
-        chemin:unbounded_string;    --contient le chemin de la commande "cd"
-        chemin2:unbounded_string;   
-        lchemin:integer;            --contient la taille du chemin
-        lchemin2:integer;            --contient la taille du chemin
-        tmpChemin:unbounded_string; --contient le chemin temporaire
-        ltmpC1:integer;
-        i:integer;
+        trouve_noeud:P_sgf;
+
+        isTrouve:boolean := false;
+
+        --contient le chemin de la commande "cd"
+        chemin:unbounded_string:= to_unbounded_string(commande(commande'First + 3 .. lcommande));
+            
+        --contient la taille du chemin
+        lchemin:integer:= lcommande - 3;  
+
+        taille:constant integer:=20;     --taille du tableau assez grand avec 20 séparateurs
+        tab:tabSep(1..taille);           --contient les éléments split du chemin
+
         begin --debut detection_commande 
 
             --met à jour le noeud
@@ -94,39 +98,57 @@ package body interpreteur is
 
             if(commande(commande'First..commande'First+1) = "cd") then
                 --R3:Réalise les opérations sur la commande cd
-
-                --récupère le chemin de la commande cd
-                chemin := to_unbounded_string(commande(commande'First + 3 .. lcommande));
-
-                --détermine la taille du chemin
-                lchemin := lcommande - 3;
                 
                 --détermine le nombre de séparateur / dans le chemin 
-
                 if(nbSeparateur(to_string(chemin),lchemin,'/') > 0) then --si il y a un separateur / dans le chemin
                     
+                    --taille := nbSeparateur(to_string(chemin),lchemin,'/') + 1; --n sperateurs = n+1 elt
+
+
                     put("split");
                     new_line;
-                    put(to_string(chemin));
+                    split(to_string(chemin),lchemin,'/',tab);
+                    
                     new_line;
+                    put("***");
                     new_line;
 
-                    --prend le premier repertoire
-                    i:=1;
-                    loop
-                        i := i + 1;
-                        if(commande(i) = '/') then
-                            i:=i-1; --indique le premier répertoire
-                            exit;
-                        end if;
-                        exit when (i=lcommande);
+                    trouve_noeud := noeud;
+
+                    for i in 1..(nbSeparateur(to_string(chemin),lchemin,'/') + 1) loop
+                        put(to_string(tab(i)));
+
+                        trouve_noeud := desc_arborescence_sgf(noeud,to_string(tab(i)),isTrouve);
+
+                        --if(isTrouve(noeud,to_string(tab(i)))) then
+                        --    put("true");
+                        --    new_linchemine;
+                        --else
+                        --    put("false");
+                        --    new_line;
+                        --end if;
+
+
+                        new_line;
                     end loop;
+
+                    put(nbSeparateur(to_string(chemin),lchemin,'/'));
+                    new_line;
+
 
                 else
                     if(to_string(chemin)="..") then
                         new_noeud := asc_arborescence_sgf(noeud); --remonte dans l'arborescence
                     else
-                        new_noeud := desc_arborescence_sgf(noeud,to_string(chemin)); --descend vers le bon repertoire
+                        new_noeud := desc_arborescence_sgf(noeud,to_string(chemin),isTrouve); --descend vers le bon repertoire
+
+                        --affiche un message pour dire que l'événement n'a pas été trouvé
+                        if(isTrouve /= true) then
+                            new_line;
+                            put(to_string(chemin));
+                            put(" : non trouvé");
+                        end if;
+
                     end if;
 
                     new_line;
@@ -173,54 +195,47 @@ package body interpreteur is
 
 
     --procedure split
-    procedure split(chaine:in string;lchaine:in integer;sep:in character) is
+    procedure split(chaine:in string;lchaine:in integer;sep:in character;tab:in out tabSep) is
         --R0:[Comment faire un split]
         
-        firstChaine: unbounded_string;  --première chaine avant le séparateur
-        secondChaine: unbounded_string; --deuxième chaine après le séparateur
-        lNewChaine:integer;             --longueur de la nouvelle chaine à tester
-        i:integer;  
+        
+        ch1:unbounded_string;
+        ch2:unbounded_string;
 
-        tab:tabSep(1..nbSeparateur(chaine,lchaine,sep));
-
-        --CMAX:integer := nbSeparateur(chaine,lchaine,sep);
-
+        i,j:integer;
+        deb:integer;
+        lch2:integer; --longueur de la chaine suivante à traiter
         begin --debut split
+            put(chaine);
 
-            --R1:Comment R0
-            new_line;
-            --put(chaine(chaine'First..lchaine));
+            i:=0;
+            j:=1;
 
-            i:=lchaine + 1;
-
+            deb:=chaine'First;
             loop
-                i := i-1;
-                
+                loop
+                i:=i+1;
+                    exit when (chaine(i) = sep);
+                    i := i + 1;
+                end loop;
 
-                if (chaine(i) = sep) then
+                ch1 := to_unbounded_string(chaine(deb..i-1));
+                ch2 := to_unbounded_string(chaine(i+1..lchaine));
+
+                tab(j) := ch1;
+                deb:=i+1;
+                j := j + 1;
+
+                lch2 := lchaine - i;
+
+                if(nbSeparateur(to_string(ch2),lch2,sep)=0) then
+                    tab(j) := ch2;
                     exit;
                 end if;
 
-                exit when (i = 1);
-
             end loop;
 
-            if (i /= 1) then
-                firstChaine := to_unbounded_string(chaine((i+1) .. lchaine ));
-
-                secondChaine := to_unbounded_string(chaine(chaine'First .. (i-1)));
-
-                --return split(to_string(secondChaine),i-1,sep);
-            else
-                firstChaine := to_unbounded_string(chaine(chaine'First .. lchaine));
-                new_line;
-            end if;
-
-            --put(to_string(firstChaine));
-            --new_line;
-            --return to_string(firstChaine);
-            --return tab;
-
+            --R1:Comment R0
     end split; --fin split;
 
 end interpreteur;

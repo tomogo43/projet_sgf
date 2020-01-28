@@ -60,7 +60,7 @@ package interpreteur is
     --pré condition: aucune
     --post condition: la chaîne est splité en fonction du séparateur  
     --*********************************************************************
-    procedure split(chaine:in string;lchaine:in integer;sep:in character);
+    procedure split(chaine:in string;lchaine:in integer;sep:in character;tab:in out tabSep);
 
 
     

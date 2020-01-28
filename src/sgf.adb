@@ -20,7 +20,7 @@ use ada.float_text_io;
 package body sgf is 
 
     --fonction desc_arborescence permet de descendre dans un repertoire enfant de l'arborescence
-    function desc_arborescence_sgf(courant:in P_sgf;nom:in string) return P_sgf is
+    function desc_arborescence_sgf(courant:in P_sgf;nom:in string;etat:in out boolean) return P_sgf is
         new_noeud:P_sgf;
         repertoire:description_elt;
         begin --debut desc_arborescence
@@ -28,10 +28,10 @@ package body sgf is
 
             new_noeud := desc_arborescence(courant,repertoire);
 
-            if(new_noeud = courant) then
-                new_line;
-                put(nom);
-                put(" : non trouvé");
+            if(new_noeud = courant) then --element trouvé
+                etat := false;
+            else                         --élément non trouvé
+                etat := true;
             end if;
 
             return new_noeud;
@@ -86,6 +86,13 @@ package body sgf is
             return emplacement; --retourne l'emplacement du répertoire courant
 
     end repertoire_courant; --fin répertoire courant
+
+    --fonction isTrouve renvoit un boolean si un élément a été trouvé
+    function isTrouve(sgf:in P_sgf;nom:in string) return boolean is
+        begin --debut trouve
+            put("trouve");
+            return false;
+    end isTrouve; --fin trouve
     
 
     procedure affiche_element (E:in description_elt) is 

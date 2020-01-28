@@ -58,11 +58,12 @@ package sgf is
     --paramètres:
     --      courant: Mode(IN) P_sgf; emplacement courant
     --      element: Mode(IN) description_elt; élément à rechercher
+    --      etat: Mode(IN/OUT) boolean; indique si l'élément a été trouvé
     --pré condition: abr non nul
     --post condition: retourne l'adresse noeud que l'on souhaite joindre
     --retourne: P_sgf
     --*********************************************************************
-    function desc_arborescence_sgf(courant:in P_sgf;nom:in string) return P_sgf;
+    function desc_arborescence_sgf(courant:in P_sgf;nom:in string;etat:in out boolean) return P_sgf;
 
     --*********************************************************************
     --nom: desc_arborescence_sgf
@@ -88,6 +89,18 @@ package sgf is
     --*********************************************************************
 
     function repertoire_courant(sgf:in P_sgf) return unbounded_string;
+
+    --*********************************************************************
+    --nom: isTrouve
+    --sémantique: Permet de savoir si un élément est présent dans le sgf
+    --paramètres:
+    --      courant: Mode(IN) P_sgf; emplacement courant
+    --      nom: Mode(IN) string; répertoire à chercher
+    --pré condition: sgf non nul
+    --post condition: renvoit true si trouve et false sinon
+    --retourne: boolean
+    --*********************************************************************
+    function isTrouve(sgf:in P_sgf;nom:in string) return boolean;
 
     --*****************************Procédures******************************
     
