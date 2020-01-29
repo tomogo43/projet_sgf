@@ -67,13 +67,15 @@ package body interpreteur is
     end input_commande;
 
     --fonction change_directory permet de changer de chemin 
-    function change_directory(noeud:in P_sgf;chemin:in string;lchemin:in integer) return P_sgf is
+    function change_directory(noeud:in P_sgf;chemin:in string;lchemin:in integer;create:in boolean) return P_sgf is
 
         taille:constant integer:=20;
         tab:tabSep(1..taille);
         trouve_noeud:P_sgf;
         new_noeud:P_sgf;
         isTrouve:boolean := false;
+
+        nbRepertoire:integer; --nombre de répertoires à spliter 
 
         valideChemin:boolean:=true; 
 
@@ -91,12 +93,19 @@ package body interpreteur is
                 trouve_noeud := noeud;
 
                 split(chemin,lchemin,'/',tab);
+                
+                --SI création d'un dossier ou d'un fichier
+                if (create) then
+                    nbRepertoire := nbSeparateur(chemin,lchemin,'/'); --le dernier morceau est l'élément à ajouter
+                else
+                    nbRepertoire := nbSeparateur(chemin,lchemin,'/') + 1;
+                end if;
 
-                for i in 1..(nbSeparateur(chemin,lchemin,'/') + 1) loop
+                for i in 1..nbRepertoire loop
 
                     trouve_noeud := desc_arborescence_sgf(trouve_noeud,to_string(tab(i)),isTrouve);
 
-                    if(isTrouve = false) then --si le chemin n'est pas trouvable
+                    if( (isTrouve = false) and (create =false)) then --si le chemin n'est pas trouvable
 
                         --affiche l'erreur du chemin introuvable 
                         put(chemin);
@@ -111,6 +120,8 @@ package body interpreteur is
                 --le chemin a bien été trouvé 
                 if(valideChemin) then
                     new_noeud := trouve_noeud;
+                else
+                    new_noeud := noeud;
                 end if;
 
             else
@@ -151,11 +162,21 @@ package body interpreteur is
 
         isTrouve:boolean := false;
 
-        --contient le chemin de la commande "cd"
+        --contient le chemin de la commande "cd" et "ls"
         chemin:unbounded_string:= to_unbounded_string(commande(commande'First + 3 .. lcommande));
+
+        --contient le chemin de la commande "mkdir"
+        chemin2:unbounded_string;
             
         --contient la taille du chemin
-        lchemin:integer:= lcommande - 3; 
+        lchemin:integer:= lcommande - 3;
+
+        --contient la taille du chemin 2 pour mkdir et touch
+        lchemin2:integer; 
+
+        i:integer; --variable d'incrémentation
+
+        nom:unbounded_string; --contient le nom du fichier ou du dossier à créer 
 
         --boolean qui informe si le chemin est correct ou non
         valideChemin:boolean:=true; 
@@ -176,30 +197,91 @@ package body interpreteur is
                 --R3:Réalise les opérations sur la commande cd
                 
 
-                new_noeud := change_directory(noeud,to_string(chemin),lchemin);
+                new_noeud := change_directory(noeud,to_string(chemin),lchemin,false);
 
             --R2:Si "ls"    
             elsif(commande(commande'First..commande'First+1) = "ls") then
 
                 --R3:Les différents fonctionnement de ls
-                --  (1) un chemin est spécifié
+                --  (1) un chemin est spécifié ou demande le détaille 
                 --  (2) aucun chemin n'est renseigné
                 
 
                 --R4:Comment R3-1
                 if(lcommande > 2) then
-                    put("un chemin est spécifié");
-                    new_line;
+
+
+                    --R5:commande ls avec un chemin
+
+                        --R6:Accéder aux informations du répertoire ciblé 
+                        new_noeud := change_directory(noeud,to_string(chemin),lchemin,false);
+
+                        --le chemin est correct
+                        if(new_noeud /= noeud) then
+                            afficher_liste(new_noeud);
+                            --revient au chemin
+                             new_noeud:=noeud;
+                        end if;                
+
                 else
                 --R4:Comment R3-2
                     afficher_liste(noeud);
                 end if;
 
                 new_line;
-            
+                        
             --R2:Si "mkdir"
             elsif(commande(commande'First..commande'First+4) = "mkdir") then
-                inserer_repertoire(noeud,commande( (commande'First + 6) .. lcommande ));
+
+                --R3:Vérifie si la commande est valide                
+
+                if(lcommande > 5) then
+                    
+                    chemin2 := to_unbounded_string(commande(commande'First + 6 .. lcommande));
+                    lchemin2 := lcommande - 6;
+
+                    --R4:Si un chemin est spécifié pour la commande mkdir
+                    if(nbSeparateur(commande,lcommande,'/') > 0) then
+                        
+                        --R5:Chemin où il faut créer le repertoire
+                        new_noeud := change_directory(noeud,to_string(chemin2),lchemin2,true);
+
+                        --si noeud trouvé
+                        if(new_noeud /= noeud) then
+
+                            i:=lcommande;
+
+                            --R6:Récupère le nom du répertoire à insérer 
+                            loop
+                                if(commande(i) = '/') then
+                                    exit;
+                                else
+                                    i:= i-1;
+                                end if;
+                            end loop;
+
+                            --on se déplace dans le répertoire cible
+                            nom := to_unbounded_string(commande((i+1) .. lcommande));
+
+                            --le répertoire est inséré dans le répertoire cible
+                            inserer_repertoire(new_noeud,to_string(nom));
+
+                            --revient au noeud courant
+                            new_noeud := noeud;
+
+                        else
+                            put("mkdir : impossible de créer le répertoire " & to_string(chemin2) & " aucun fichier ou dossier de ce type");
+                            new_line;
+                        end if;
+                    else
+                        inserer_repertoire(noeud,to_string(chemin2));
+
+                    end if;
+                else 
+                    put("mkdir : opérande manquante");
+                    new_line;
+                end if;
+                
             
             --R2:Si "touch"
             elsif(commande(commande'First..commande'First+4) = "touch") then

@@ -18,6 +18,7 @@ package sgf is
                 nom:unbounded_string;
                 element_type:type_elt;
                 --(TO DO) ajouter la taille
+                taille:integer;
             end record;
 
     

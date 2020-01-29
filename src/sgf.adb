@@ -24,7 +24,7 @@ package body sgf is
         new_noeud:P_sgf;
         repertoire:description_elt;
         begin --debut desc_arborescence
-            repertoire := (to_unbounded_string(nom),DIR);
+            repertoire := (to_unbounded_string(nom),DIR,10);
 
             new_noeud := desc_arborescence(courant,repertoire);
 
@@ -115,15 +115,18 @@ package body sgf is
             return false;
     end isTrouve; --fin trouve
     
-
+    --procedure affiche_element
     procedure affiche_element (E:in description_elt) is 
+        --permet de caster la taille en unbounded string
+        taille:unbounded_string := to_unbounded_string(Integer'Image(E.taille));
         begin --début affichenombre
+
             put(to_string(E.nom));
 
             if(E.element_type = DIR) then
-                put("(DIR)  ");
+                put("(DIR)  [" & to_string(taille) & "] ");
             else
-                put("(FIL)  ");
+                put("(FIL)  [" & to_string(taille) & "] ");
             end if;
 
     end affiche_element;
@@ -163,6 +166,7 @@ package body sgf is
         begin --debut inserer_repertoire
             repertoire.nom := to_unbounded_string(nom);
             repertoire.element_type := DIR;
+            repertoire.taille := 10;
             inserer_noeud(sgf,repertoire);
     end inserer_repertoire;
 
@@ -172,6 +176,7 @@ package body sgf is
         begin --debut inserer_repertoire
             fichier.nom := to_unbounded_string(nom);
             fichier.element_type := FIL;
+            fichier.taille := 0;
             inserer_noeud(sgf,fichier);
     end inserer_fichier;
 
