@@ -301,6 +301,41 @@ package body arbre is
     end supprimer_noeud;
 
 
+    --procedure parcourir_arbre parcourt un arbre
+    procedure parcourir_arbre(abr:in P_Arbre) is
+        noeud:P_arbre;
+        courant:T_Liste_Enfant;
+        begin --début parcourir_arbre
+            noeud:=abr;
+            put("parcourir arbre");
+            new_line;
+
+            if(noeud.all.enfant /= null) then
+                affiche_noeud(noeud);
+                --afficher_noeuds_enfants(noeud);
+                
+                courant := noeud.all.enfant;
+                new_line;
+                put("-----");
+                new_line;
+                loop
+                    affiche(courant.all.noeud.all.element);
+                    
+                    if(courant.all.noeud.all.enfant /= null) then
+                        parcourir_arbre(courant.all.noeud);
+                        --put("ok");
+                    end if;
+
+                    courant := courant.all.suivant;
+
+                    exit when courant = null;
+                end loop;
+
+            end if;
+
+    end parcourir_arbre;
+
+
     --------------------------------------------------------------------------------
     --                                  TEST
     --------------------------------------------------------------------------------

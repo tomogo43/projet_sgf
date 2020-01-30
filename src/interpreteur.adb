@@ -285,7 +285,57 @@ package body interpreteur is
             
             --R2:Si "touch"
             elsif(commande(commande'First..commande'First+4) = "touch") then
-                inserer_fichier(noeud, commande( (commande'First + 6) .. lcommande ));
+                --inserer_fichier(noeud, commande( (commande'First + 6) .. lcommande ));
+
+                --R3:Vérifie si la commande est valide                
+
+                if(lcommande > 5) then
+                    
+                    chemin2 := to_unbounded_string(commande(commande'First + 6 .. lcommande));
+                    lchemin2 := lcommande - 6;
+
+                    --R4:Si un chemin est spécifié pour la commande mkdir
+                    if(nbSeparateur(commande,lcommande,'/') > 0) then
+                        
+                        --R5:Chemin où il faut créer le repertoire
+                        new_noeud := change_directory(noeud,to_string(chemin2),lchemin2,true);
+
+                        --si noeud trouvé
+                        if(new_noeud /= noeud) then
+
+                            i:=lcommande;
+
+                            --R6:Récupère le nom du répertoire à insérer 
+                            loop
+                                if(commande(i) = '/') then
+                                    exit;
+                                else
+                                    i:= i-1;
+                                end if;
+                            end loop;
+
+                            --on se déplace dans le répertoire cible
+                            nom := to_unbounded_string(commande((i+1) .. lcommande));
+
+                            --le répertoire est inséré dans le répertoire cible
+                            inserer_fichier(new_noeud,to_string(nom));
+
+                            --revient au noeud courant
+                            new_noeud := noeud;
+
+                        else
+                            put("touch : impossible de faire un touch " & to_string(chemin2) & " aucun fichier ou dossier de ce type");
+                            new_line;
+                        end if;
+                    else
+                        inserer_fichier(noeud,to_string(chemin2));
+
+                    end if;
+                else 
+                    put("touch : opérande de fichier manquant");
+                    new_line;
+                end if;
+
 
             --R2:Si "rm"
             elsif(commande(commande'First..commande'First+1) = "rm") then
@@ -293,11 +343,17 @@ package body interpreteur is
                 new_line;
                 supprimer_fichier(noeud, commande(commande'First + 3 .. lcommande));
 
+            --R2:Si "pwd"
             elsif(commande(commande'First..commande'First+2) = "pwd") then
                 --R3:Affiche l'emplacement du repertoire
                 put(to_string(repertoire_courant(noeud)));
                 new_line;
 
+            --R2:Si "exit"
+            elsif(commande(commande'First..commande'First+3) = "exit") then
+                --R3:Affiche message 
+                put("A bientôt!");
+                new_line;
     
             --R2:Commande inconnue
             else
@@ -337,9 +393,8 @@ package body interpreteur is
 
                 --R3:Récupérer le premier morceau entre le début de la chaîne et le separateur
                 loop
-                i:=i+1;
+                    i:=i+1;
                     exit when (chaine(i) = sep);
-                    i := i + 1;
                 end loop;
                 
                 --ch1 prend la valeur du premier morceau

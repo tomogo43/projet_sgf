@@ -165,6 +165,7 @@ package arbre is
 
     procedure supprimer_noeud(noeud:in out P_arbre;element: in T_Element);
 
+    procedure parcourir_arbre(abr:in P_arbre);
 
     private
 

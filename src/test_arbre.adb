@@ -10,6 +10,7 @@
 with Ada.Strings.Unbounded;
 use Ada.Strings.Unbounded;
 
+
 with arbre;
 
 
@@ -44,8 +45,12 @@ procedure test_arbre is
         --*********************initialisation de l'arbre***********************
         initialiser_arbre(abr);
         --*********************************************************************
+        
+        --*********************************************************************
+        --                         tests sur l'arbre
+        --*********************************************************************
 
-        --*************************tests sur l'arbre***************************
+        pragma assert(est_vide(abr));
 
         if (est_vide(abr)) then  --vérifie si l'arbre n'est pas vide ==> non initialisé
             put("l'arbre est vide");
@@ -63,6 +68,12 @@ procedure test_arbre is
                 new_line;
                 inserer_noeud(abr,3);
                 inserer_noeud(abr,4);
+
+                abr := desc_arborescence(abr,4);
+                inserer_noeud(abr,21);
+                abr := asc_arborescence(abr);
+
+                --noeud := asc_arborescence(noeud);
                 --afficher_arbre(abr);
                 
                 --jeu de test sur le changement de noeud dans le répertoire 
@@ -86,30 +97,31 @@ procedure test_arbre is
                 --afficher_noeuds_enfants(noeud);
 
                 noeud:=abr;
+                affiche_noeud(noeud);
+                --new_line;
+                --modifier_noeud(noeud,5);
+                --affiche_noeud(noeud);
+                new_line;
+                afficher_noeuds_enfants(noeud);
+
+                new_line;
+
+                parcourir_arbre(noeud);
+
+                --affiche_noeud(noeud);
+                --noeud := desc_arborescence(noeud,3);
+                --new_line;
+                --affiche_noeud(noeud);
+
+
+                --noeud := asc_arborescence(noeud);
                 --affiche_noeud(noeud);
                 --new_line;
                 --modifier_noeud(noeud,5);
                 --affiche_noeud(noeud);
                 --new_line;
-                --afficher_noeuds_enfants(noeud);
-
-                new_line;
-                new_line;
-                affiche_noeud(noeud);
-                noeud := desc_arborescence(noeud,3);
-                new_line;
-                affiche_noeud(noeud);
-                new_line;
-                new_line;
-
-                noeud := asc_arborescence(noeud);
-                affiche_noeud(noeud);
-                new_line;
-                modifier_noeud(noeud,5);
-                affiche_noeud(noeud);
-                new_line;
-                noeud := desc_arborescence(noeud,3);
-                affiche_noeud(noeud);
+                --noeud := desc_arborescence(noeud,3);
+                --affiche_noeud(noeud);
 
                 
             end if;
@@ -117,6 +129,7 @@ procedure test_arbre is
         else
             put("larbre n'est pas vide");
         end if;
+
 
     
 end test_arbre; --fin test_arbre
