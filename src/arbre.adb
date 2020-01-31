@@ -159,7 +159,6 @@ package body arbre is
         new_noeud:P_Arbre;    --nouveau noeud à insérer
         liste:T_Liste_Enfant; --liste pointant sur le début de la liste des enfants de abr
         
-
         begin --debut inserer_noeud
 
             --R1:Comment R0
@@ -178,13 +177,31 @@ package body arbre is
                 --R4:Parcourir la liste jusqu'à la fin de la liste des enfants 
                 liste := abr.all.enfant;
 
-                loop
-                    exit when liste.all.suivant = null;
+                loop                    
+
+                    --Si l'élément existe déjà
+                    if(element = liste.all.noeud.all.element) then
+                        put("l'élément :");
+                        affiche(element);
+                        put(" existe déjà");
+                        new_line;
+                        exit; --sort de la boucle 
+                    end if;
+
+                    --arrive à la fin de la liste 
+                    if(liste.all.suivant = null) then
+                        --R4:Le nouveau noeud est ajouté à la fin de la liste
+                        liste.all.suivant := new T_Cellule_Enfant'(new_noeud,null);
+                        exit;
+                    end if;
+
                     liste:= liste.all.suivant;
+                    
+
+                    
                 end loop;
 
-                --R4:Le nouveau noeud est ajouté à la fin de la liste
-                liste.all.suivant := new T_Cellule_Enfant'(new_noeud,null);
+                
             end if;
     end inserer_noeud;
 
