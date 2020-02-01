@@ -13,6 +13,8 @@ use Ada.Strings.Unbounded;
 
 with arbre;
 
+with Ada.Assertions;  use Ada.Assertions;
+
 
 with text_io;
 use text_io;
@@ -44,13 +46,18 @@ procedure test_arbre is
 
         --*********************initialisation de l'arbre***********************
         initialiser_arbre(abr);
+
+        Assert(est_vide(abr),"l'arbre n'est pas vide"); --lève une assertion si non vide
         --*********************************************************************
         
         --*********************************************************************
         --                         tests sur l'arbre
         --*********************************************************************
 
-        pragma assert(est_vide(abr));
+        
+        
+
+
 
         if (est_vide(abr)) then  --vérifie si l'arbre n'est pas vide ==> non initialisé
             put("l'arbre est vide");
