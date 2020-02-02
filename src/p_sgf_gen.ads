@@ -3,10 +3,10 @@
 with Ada.Strings.Unbounded;
 use Ada.Strings.Unbounded;
 
-with arbre;
+with p_arbre_gen;
 
 
-package sgf is
+package p_sgf_gen is
 
     --*****************************Les types****************************
     --le type d'élément possible
@@ -39,8 +39,8 @@ package sgf is
     procedure affiche_element (E:in description_elt);
 
     --instanciation de l'arbre générique 
-    package arbre_description_element is new arbre(T_Element=>description_elt,
-                                                   affiche=>affiche_element);
+    package arbre_description_element is new p_arbre_gen(T_Element=>description_elt,
+                                                         affiche=>affiche_element);
     
     use arbre_description_element;
 
@@ -170,4 +170,4 @@ package sgf is
     procedure supprimer_fichier(sgf:in out P_sgf; nom:string);
  
 
-end sgf;
+end p_sgf_gen;

@@ -7,7 +7,7 @@
 --corps du package SGF
 --******************************************************************
 
-with arbre;
+with p_arbre_gen;
 with text_io;
 use text_io;
 
@@ -17,7 +17,7 @@ use ada.integer_text_io;
 with ada.float_text_io;
 use ada.float_text_io;
 
-package body sgf is 
+package body p_sgf_gen is 
 
     --fonction desc_arborescence permet de descendre dans un repertoire enfant de l'arborescence
     function desc_arborescence_sgf(courant:in P_sgf;nom:in string;etat:in out boolean) return P_sgf is
@@ -200,4 +200,4 @@ package body sgf is
             afficher_noeuds_enfants(noeud);
     end afficher_liste;
 
-end sgf;
+end p_sgf_gen;

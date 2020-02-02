@@ -8,7 +8,7 @@ generic
     --utilisation d'une procedure permettant d'afficher un type generic
     with procedure affiche(E:in T_Element); --pour afficher T_Element
 
-package arbre is
+package p_arbre_gen is
 
 
     type P_Arbre is private;
@@ -67,6 +67,30 @@ package arbre is
     --*********************************************************************
 
     function retourne_noeud(noeud:in P_Arbre) return T_Element;
+    
+
+    --*********************************************************************
+    --nom: rechercher
+    --sémantique: Recherche un enfant dans liste enfant
+    --paramètres:
+    --      enfant: Mode(IN) T_Liste_Enfant; enfant
+    --pré condition: enfant /= null
+    --post condition: retourne l'adresse de l'enfant si existe ou null sinon
+    --retourne: T__Liste_Enfant
+    --*********************************************************************
+    function rechercher(element: in T_element;enfant: in T_Liste_Enfant) return T_Liste_Enfant;
+
+    --*********************************************************************
+    --nom: existe_enfant_element
+    --sémantique: Verifie si un élément existe dans le noeud courant
+    --paramètres:
+    --      noeud: Mode(IN) P_Arbre; enfant
+    --      element:Mode(IN) T_Element; element à rechercher
+    --pré condition: noeud /= null
+    --post condition: retourne true si existe ou false sinon
+    --retourne: boolean
+    --*********************************************************************
+    function existe_enfant_element(noeud:in P_Arbre;element:in T_Element) return boolean;
 
     --*********************************Procedure*******************************
 
@@ -163,6 +187,8 @@ package arbre is
 
     procedure modifier_noeud(noeud:in out P_Arbre;new_element: in T_Element);
 
+    
+
     procedure supprimer_noeud(noeud:in out P_arbre;element: in T_Element);
 
     procedure parcourir_arbre(abr:in P_arbre);
@@ -203,4 +229,4 @@ package arbre is
                 noeud:P_Arbre;
                 suivant:T_Liste_Enfant;
             end record;
-end arbre;
+end p_arbre_gen;

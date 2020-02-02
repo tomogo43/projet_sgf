@@ -7,12 +7,12 @@
 --******************************************************************
 
 --sgf
-with sgf;
-use sgf;
+with p_sgf_gen;
+use p_sgf_gen;
 
 --interpreteur
-with interpreteur;
-use interpreteur;
+with p_interpreteur;
+use p_interpreteur;
 
 with text_io;
 use text_io;

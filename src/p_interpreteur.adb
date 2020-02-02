@@ -10,13 +10,13 @@
 with Ada.Strings.Unbounded;
 use Ada.Strings.Unbounded;
 
-with arbre;
+with p_arbre_gen;
 with text_io;
 use text_io;
 
 --SGF
-with sgf;
-use sgf;
+with p_sgf_gen;
+use p_sgf_gen;
 
 with ada.integer_text_io;
 use ada.integer_text_io;
@@ -24,7 +24,7 @@ use ada.integer_text_io;
 with ada.float_text_io;
 use ada.float_text_io;
 
-package body interpreteur is
+package body p_interpreteur is
     
     function nbSeparateur(chaine:in String;lchaine:in integer;sep:in character) return integer is
         nb:integer;
@@ -424,4 +424,4 @@ package body interpreteur is
             --R1:Comment R0
     end split; --fin split;
 
-end interpreteur;
+end p_interpreteur;

@@ -7,7 +7,7 @@
 --corps du package generic arbre
 --******************************************************************
 
-with arbre;
+with p_arbre_gen;
 with text_io;
 use text_io;
 
@@ -17,7 +17,7 @@ use ada.integer_text_io;
 with ada.float_text_io;
 use ada.float_text_io;
 
-package body arbre is
+package body p_arbre_gen is
 
     --*************************Fonctions****************************
 
@@ -98,28 +98,51 @@ package body arbre is
 
     end asc_arborescence;
 
+
     --Fonction qui recherche un entier dans la liste T_Liste_Entier
-    function rechercher(element: in T_element;enfant: in out T_Liste_Enfant) return T_Liste_Enfant is
+    function rechercher(element: in T_element;enfant: in T_Liste_Enfant) return T_Liste_Enfant is
         adresse:T_Liste_Enfant:=null;
         courant:T_Liste_Enfant:=enfant;
+        ELEMENT_EXISTANT:exception;
+
+        --R0:Comment rechercher dans les enfants d'un noeud
+
         begin --début rechercher
         
+        --R1:Comment R0
 
+        --R2:Vérifier si le noeud a des enfants
         if enfant /= null then
 
+            --R3:Parcourir le noeud jusqu'à trouver l'élément cherché
             loop
+
+                --tant que l'élément n'est pas trouvé l'adresse vaut null
 
                 if element/= courant.all.noeud.element then
                     courant:=courant.all.suivant;
                     adresse:=null;
                     
-                else
+                else 
+                    --sinon l'adresse prend l'adresse de l'élément cherché
                     adresse:=courant;
                 end if;
             exit when courant=null or adresse/=null;
             end loop;
         end if;
-        return adresse;
+
+
+        if adresse /= null then
+            return adresse;             --si adresse trouvé retourne son adresse
+        else
+            raise ELEMENT_EXISTANT;     --sinon lève l'exception
+        end if;
+
+        exception
+            when ELEMENT_EXISTANT   => put_line("element non trouvé"); RAISE; --propagation de l'exception
+            when others             => put_line("une autre erreur est apparue"); RAISE;  --propagation de l'exception
+
+        
     end rechercher;
 
     --fonction retourne_noeud retourne le noeud courant
@@ -131,6 +154,29 @@ package body arbre is
 
             return noeud.all.element ;
     end retourne_noeud;
+
+
+    function existe_enfant_element(noeud:in P_Arbre;element:in T_Element) return boolean is
+        enfant:T_Liste_Enfant;
+        begin --debut existe_enfant_element
+            enfant := noeud.all.enfant;
+
+            if enfant = null then
+                return false;
+            else
+                loop    
+                    if (enfant.all.noeud.all.element = element) then
+                        return true;
+                    else
+                        enfant := enfant.all.suivant;
+                        if(enfant = null) then
+                            return false;
+                        end if;
+                    end if;
+                end loop;
+            end if;
+    end existe_enfant_element;
+
 
     --*************************Procedures****************************
 
@@ -158,6 +204,8 @@ package body arbre is
 
         new_noeud:P_Arbre;    --nouveau noeud à insérer
         liste:T_Liste_Enfant; --liste pointant sur le début de la liste des enfants de abr
+
+        ELEMENT_EXISTANT:exception;
         
         begin --debut inserer_noeud
 
@@ -181,11 +229,9 @@ package body arbre is
 
                     --Si l'élément existe déjà
                     if(element = liste.all.noeud.all.element) then
-                        put("l'élément :");
-                        affiche(element);
-                        put(" existe déjà");
-                        new_line;
-                        exit; --sort de la boucle 
+
+                        raise ELEMENT_EXISTANT; --lève l'exception ELEMENT_EXISTANT et sort de la boucle
+                        
                     end if;
 
                     --arrive à la fin de la liste 
@@ -203,6 +249,15 @@ package body arbre is
 
                 
             end if;
+
+            --gestion des exceptions de la procédure
+            exception
+                when ELEMENT_EXISTANT    => put("l'élément :");
+                                            affiche(element);
+                                             put(" existe déjà");
+                                            new_line;
+                when others             => put("erreur insérer noeud"); 
+
     end inserer_noeud;
 
     --procedure parcourir_enfant qui parcourt une liste chaînée d'enfant
@@ -273,46 +328,47 @@ package body arbre is
     --procedure supprimer_noeud supprime un noeud dans l'arbre
     procedure supprimer_noeud(noeud:in out P_arbre;element: in T_Element) is
         enfant:T_Liste_Enfant;
+        SUPPRESSION_IMPOSSIBLE:exception;
+
         --R0:[Comment supprimer un élément dans un arbre
         begin --début supprimer_noeud
 
             --R1:Comment R0
-            put("supprimer_noeud");
-
-
-            --if rechercher(F_e,F_l) /= null then
-            --loop
-            --courant:=courant.all.suivant;
-            --exit when courant.all.suivant.all.element=F_e;
-            --end loop;
-            --courant.all.suivant:=courant.all.suivant.all.suivant;
-            --end if;
 
             --R2:Si le noeud courant n'est pas null
             if(noeud /= null) then
                 --R3:Parcourir les enfants du noeud courant
-                enfant:=noeud.all.enfant;
 
-                new_line;
+                enfant:=noeud.all.enfant; --récupère les enfants
 
-                if (rechercher(element,enfant) /= null) then
 
-                    put("element trouvé");
-                    new_line;
+                if (rechercher(element,enfant) = null) then --si l'élément n'existe pas
+                    raise SUPPRESSION_IMPOSSIBLE; --lève l'exception
+                else    
+                    put_line("do something");
 
-                else
-                    put("element non trouvé");
-                    new_line;
+                    loop
+                        affiche(enfant.all.noeud.all.element);
+                        enfant := enfant.all.suivant;
+                        exit when (enfant = null);
+                    end loop;
+                    
+
+                    if(enfant.all.noeud.all.element = element) then
+                        put_line("supprime l'élément");
+                        noeud.all.enfant := null;
+                    else
+                        put_line("cherche ailleurs");
+                    end if;
+
                 end if;
-
-
-
-
-            --R2:Si le noeud à la valeur null
             else
-                put("le noeud est inexistant");
-
+                raise SUPPRESSION_IMPOSSIBLE;
             end if;
+
+            exception
+                when SUPPRESSION_IMPOSSIBLE => put_line("suppression impossible");
+                when others                 => put_line("impossible de supprimer le noeud");
 
 
     end supprimer_noeud;
@@ -408,4 +464,4 @@ package body arbre is
     end afficher_arbre; --fin afficher arbre
 
 
-end arbre;
+end p_arbre_gen;

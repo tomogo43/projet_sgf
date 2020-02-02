@@ -6,10 +6,10 @@ use ada.integer_text_io;
 with Ada.Strings.Unbounded;
 use Ada.Strings.Unbounded;
 
-with sgf;
-use sgf;
+with p_sgf_gen;
+use p_sgf_gen;
 
-package interpreteur is
+package p_interpreteur is
 
     --********************************Variables********************************
     
@@ -64,4 +64,4 @@ package interpreteur is
 
 
     
-end interpreteur;
+end p_interpreteur;
